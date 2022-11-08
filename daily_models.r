@@ -13,7 +13,7 @@ data = read.csv('BTC-USD.csv')
 data[,1] = as.Date(data[,1])
 
 #ts <- ts(data$adjclose, start=c(2014, as.numeric(format(as.Date('2014-09-17'), '%j'))), frequency=365)/
-ts <- zoo(data$adjclose, as.Date('2014-09-17') + 1:length(data$adjclose) - 1)
+ts <- zoo(log(data$adjclose), as.Date('2014-09-17') + 1:length(data$adjclose) - 1)
 
 
 # model fitting
@@ -40,5 +40,5 @@ hist(fit1$residuals)
 qqnorm(fit1$residuals) 
 qqline(fit1$residuals)
 plot(fit1$residuals)
-acf(fit1$residuals)
+acf(fit1$residuals, lag.max=1000)
 shapiro.test(fit1$residuals)
