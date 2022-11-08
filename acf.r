@@ -35,7 +35,7 @@ pacf(diff1.close)
 diff2.close = diff(diff1.close)
 ggplot() +
   geom_line(aes(x=data[3:2934,1], y=diff2.close)) +
-  ylab(TeX('$\\nabla^2$closing price')) +
+  ylab(TeX('$\\nabla^2$closing price'))
 acf(diff2.close, ci.type='ma')
 pacf(diff2.close)
 
@@ -44,5 +44,13 @@ diffs.close = diff(diff1.close, lag = 7)
 ggplot() +
   geom_line(aes(x=data[9:2934,1], y=diffs.close)) +
   ylab(TeX('$\\nabla_s\\nabla$closing price'))
-acf(diffs.close, ci.type='ma')
-pacf(diffs.close)
+acf(diffs.close, ci.type='ma', lag.max=60)
+pacf(diffs.close, lag.max=60)
+
+# take difference once, and followed by seasonal difference with period=30
+diffs.close = diff(diff1.close, lag = 30)
+ggplot() +
+  geom_line(aes(x=data[32:2934,1], y=diffs.close)) +
+  ylab(TeX('$\\nabla_s\\nabla$closing price'))
+acf(diffs.close, ci.type='ma', lag.max=60)
+pacf(diffs.close, lag.max = 60)
