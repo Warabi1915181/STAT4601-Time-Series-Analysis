@@ -79,14 +79,24 @@ pacf(diffs2.value, lag.max=60)
 #################################
 #################################
 #################################
-fit <- arima(ts.series, c(0,1,0), seasonal= list(order=c(1,0,0), period=12))
+fit <- arima(ts.series, c(12,1,0))
 fit
 res <- resid(fit)
-acf(res, ci.type='ma', lag.max=60)
+acf(res, ci.type='ma', lag.max=60)  # some minor significant ACFs at lag 2-3. We try adding MA components
+#################################
+fit <- arima(ts.series, c(12,1,3))
+fit
+res <- resid(fit)
+acf(res, ci.type='ma', lag.max=60) # the significant ACFs at lag2-3 are gone. The coefficients from AR1 to AR11 are less siginificant than previuos model. We try a seasonal arima model.
+#################################
+fit <- arima(ts.series, c(0,1,3), seasonal= list(order=c(1,0,0), period=12))
+fit
+res <- resid(fit)
+acf(res, ci.type='ma', lag.max=60)  # the residual ACFs look slightly better than previous model (outliers are less significant). Also MA3 is insignificant. We try a smaller model.
 #################################
 fit <- arima(ts.series, c(0,1,2), seasonal= list(order=c(1,0,0), period=12))
 fit
-res <- resid(fit)
+res <- resid(fit)                   # the coefficients are significant. The residual ACF is similar to previous model.
 acf(res, ci.type='ma', lag.max=60)
 
 tsdiag(fit)
@@ -99,88 +109,72 @@ shapiro.test(fit$residuals)
 LB.test(fit, lag=10, type="Ljung-Box")
 
 
+
+
 #################################
 #################################
 #################################
-fit <- arima(ts.series, c(0,0,1), seasonal= list(order=c(1,1,0), period=12))
+fit <- arima(ts.series, c(1,0,0), seasonal= list(order=c(0,1,1), period=12))  # sharp decrease in seasonal part and slow decay in common component for ACF; sharp decrease in common part and slow decay in seasonal component for PACF
+fit
+res <- resid(fit)
+acf(res, ci.type='ma', lag.max = 60)
+#################################
+fit <- arima(ts.series, c(1,0,1), seasonal= list(order=c(0,1,1), period=12))  # significant coefficients, significant drops in AIC
 fit
 res <- resid(fit)
 acf(res, ci.type='ma')
-pacf(res)
-
-
 #################################
-fit <- arima(ts.series, c(1,0,1), seasonal= list(order=c(1,1,0), period=12))
+fit <- arima(ts.series, c(2,0,1), seasonal= list(order=c(0,1,1), period=12))  # better residual ACF, drop in AIC
 fit
 res <- resid(fit)
-acf(res, ci.type='ma')
-pacf(res, lag.max=60)
-
-
-res.stl <- stl(res1, s.window='periodic')
-plot(res.stl)
-
+acf(res, ci.type='ma', lag.max = 60)
 
 tsdiag(fit)
-hist(fit$residuals)
+hist(fit$residuals)         # histogram is symmetric and looks like a bell shape.
 qqnorm(fit$residuals) 
 qqline(fit$residuals)
 plot(fit$residuals)
 shapiro.test(fit$residuals)
 LB.test(fit, lag=10, type="Ljung-Box")
+#################################
+fit <- arima(ts.series, c(1,0,2), seasonal= list(order=c(0,1,1), period=12))  # worse residual ACF compared to arima(2,0,1) x sarima(0,1,1); increase in AIC. Not desirable
+fit
+res <- resid(fit)
+acf(res, ci.type='ma')
+
+
 
 
 
 #################################
 #################################
 #################################
-fit1 <- arima(ts.series, c(0,1,1), seasonal= list(order=c(0,1,1), period=12))
-fit1
-res1 <- resid(fit1)
-acf(res1, ci.type='ma')
-pacf(res1)
-
-res1.stl <- stl(res1, s.window='periodic')
-plot(res1.stl)
-
-
-tsdiag(fit1)
-hist(fit1$residuals)
-qqnorm(fit1$residuals) 
-qqline(fit1$residuals)
-plot(fit1$residuals)
-shapiro.test(fit1$residuals)
-LB.test(fit1, lag=10, type="Ljung-Box")
-############################
-fit2 <- arima(ts.series, c(0,1,2), seasonal= list(order=c(0,1,1), period=12))
-fit2
-res2 <- resid(fit2)
-acf(res2, ci.type='ma')
-pacf(res2)
-
-res2.stl <- stl(res2, s.window='periodic')
-plot(res2.stl)
-
-
-tsdiag(fit2)
-hist(fit2$residuals)
-qqnorm(fit2$residuals) 
-qqline(fit2$residuals)
-plot(fit2$residuals)
-shapiro.test(fit2$residuals)
-LB.test(fit2, lag=10, type="Ljung-Box")
-
-
-################################# 
-# (BEST)
-fit <- arima(ts.series, c(1,1,1), seasonal= list(order=c(0,1,1), period=12))
+fit <- arima(ts.series, c(0,1,1), seasonal= list(order=c(0,1,1), period=12)) # from the ACF plot after differencing and seasonal differencing
 fit
 res <- resid(fit)
 acf(res, ci.type='ma')
 pacf(res)
-
-res.stl <- stl(res1, s.window='periodic')
-plot(res.stl)
+#################################
+fit <- arima(ts.series, c(0,1,2), seasonal= list(order=c(0,1,1), period=12))  # significant coefficients, better AIC
+fit
+res <- resid(fit)
+acf(res, ci.type='ma', lag.max = 60)
+#################################
+fit <- arima(ts.series, c(0,1,2), seasonal= list(order=c(1,1,1), period=12))  # insignificant SAR1 coefficient, worse AIC
+fit
+res <- resid(fit)
+acf(res, ci.type='ma', lag.max = 60)
+#################################
+fit <- arima(ts.series, c(1,1,2), seasonal= list(order=c(0,1,1), period=12))  # significant ar1 coefficient, better AIC
+fit
+res <- resid(fit)
+acf(res, ci.type='ma', lag.max = 60)
+acf(res, ci.type='ma', lag.max = 60)
+#################################
+fit <- arima(ts.series, c(1,1,1), seasonal= list(order=c(0,1,1), period=12))  # significant coefficient, better AIC
+fit
+res <- resid(fit)
+acf(res, ci.type='ma', lag.max = 60)
 
 
 tsdiag(fit)
@@ -188,5 +182,16 @@ hist(fit$residuals)
 qqnorm(fit$residuals) 
 qqline(fit$residuals)
 plot(fit$residuals)
+plot(scale(fit$residuals))
+shapiro.test(fit$residuals)
+LB.test(fit, lag=10, type="Ljung-Box")
+################################# 
+fit <- arima(ts.series, c(1,1,1), seasonal= list(order=c(0,1,3), period=12))  # slightly significant coefficients in sma2 and sma3. Better AIC
+fit
+res <- resid(fit)
+acf(res, ci.type='ma', lag.max = 60)
+
+tsdiag(fit)
+hist(fit$residuals)
 shapiro.test(fit$residuals)
 LB.test(fit, lag=10, type="Ljung-Box")
