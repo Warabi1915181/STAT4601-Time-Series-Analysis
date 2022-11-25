@@ -81,40 +81,36 @@ pacf(diffs2.value, lag.max=60)
 #################################
 fit <- arima(ts.series, c(12,1,0))
 fit
-res <- resid(fit)
-acf(res, ci.type='ma')  # some significant ACFs at lag 4. We try adding MA components
+acf(fit$residuals, ci.type='ma', main=TeX('Residual ACF Plot for ARIMA$(12,1,0)$'))  # some significant ACFs at lag 4. We try adding MA components
 #################################
 fit <- arima(ts.series, c(12,1,4))
 fit
-res <- resid(fit)
-acf(res, ci.type='ma') # the significant ACFs at lag 4 are gone. The coefficients from MA2 to MA4 are insignificant. We try a smaller model.
+acf(fit$residuals, ci.type='ma', main=TeX('Residual ACF Plot for ARIMA$(12,1,4)$')) # the significant ACFs at lag 4 are gone. The coefficients from MA2 to MA4 are insignificant. We try a smaller model.
 #################################
 fit <- arima(ts.series, c(12,1,1))
 fit
-res <- resid(fit)
-acf(res, ci.type='ma') # The performance is similar without MA2 to MA4. The coefficients from AR1 to AR11 are also less significant than previous model. We try a seasonal arima model.
+acf(fit$residuals, ci.type='ma', main=TeX('Residual ACF Plot for ARIMA$(12,1,1)$')) # The performance is similar without MA2 to MA4. The coefficients from AR1 to AR11 are also less significant than previous model. We try a seasonal arima model.
 #################################
 fit <- arima(ts.series, c(0,1,1), seasonal= list(order=c(1,0,0), period=12))
 fit
-res <- resid(fit)
-acf(res, ci.type='ma', lag.max=60)  # Worse performance in general. We try bigger models.
+acf(fit$residuals, ci.type='ma', main=TeX('Residual ACF Plot for SARIMA$(0,1,1) \\times (1,0,0)_{12}$'))  # Worse performance in general. We try bigger models.
 #################################
 fit <- arima(ts.series, c(1,1,1), seasonal= list(order=c(1,0,0), period=12))
 fit
-res <- resid(fit)
-acf(res, ci.type='ma', lag.max=60)
+acf(fit$residuals, ci.type='ma', main=TeX('Residual ACF Plot for SARIMA$(1,1,1) \\times (1,0,0)_{12}$'))
 #################################
-fit <- arima(ts.series, c(0,1,2), seasonal= list(order=c(1,0,0), period=12))
-fit
-res <- resid(fit)                   # the coefficients are significant. The residual ACF is similar to previous model. (Final model)
-acf(res, ci.type='ma', lag.max=60)
+fit <- arima(ts.series, c(0,1,2), seasonal= list(order=c(1,0,0), period=12)) # the coefficients are significant. The residual ACF is similar to previous model. (Final model)
+fit                         # AIC = -1839.33
+acf(fit$residuals, ci.type='ma', main=TeX('Residual ACF Plot for SARIMA$(0,1,2) \\times (1,0,0)_{12}$'))
 
 tsdiag(fit)
-hist(fit$residuals)
+hist(fit$residuals, main='Histogram of Fit Residuals', xlab='fit residuals')
 qqnorm(fit$residuals) 
 qqline(fit$residuals)
 
-plot(fit$residuals)
+res <- scale(fit$residuals)
+res.ts <- ts(res, frequency=12, start=c(1973, 1))
+plot(res.ts, xlab='Time', ylab='', main='Standardized Residuals Scatterplot', type='p')
 shapiro.test(fit$residuals)
 LB.test(fit, lag=10, type="Ljung-Box")
 
