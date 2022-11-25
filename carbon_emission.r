@@ -319,3 +319,43 @@ lines(y=fit3.pred$pred+0.96*fit3.pred$se, x=c((l+1):(l+pred)), col="green")
 points(y=fit3.pred$pred+0.96*fit3.pred$se, x=c((l+1):(l+pred)), col="green")      
 lines(y=fit3.pred$pred-0.96*fit3.pred$se, x=c((l+1):(l+pred)), col="green")      
 points(y=fit3.pred$pred-0.96*fit3.pred$se, x=c((l+1):(l+pred)), col="green")      
+
+# ggplot
+pred_date<-seq(as.Date("2022-07-01"), by = "month", length.out = 12)
+plotdata<-data.frame(time=data$time, data=data$log.value, type=0)
+
+# Model1
+plotpred1<-data.frame(time=pred_date, data=fit1.pred$pred, type=1)
+plotmodel1<-rbind(plotdata,plotpred1)
+plotmodel1$type<-factor(plotmodel1$type)
+levels(plotmodel1$type)<-c('original', 'predict')
+ggplot(plotmodel1, 
+       aes(x = time, y = data, group = type, colour = type)) + 
+  geom_line() +
+  geom_point() +
+  scale_color_manual(values=c("black", "blue")) +
+  ggtitle("Model 1 Forecasting")
+
+# Model2
+plotpred2<-data.frame(time=pred_date, data=fit2.pred$pred, type=1)
+plotmodel2<-rbind(plotdata,plotpred2)
+plotmodel2$type<-factor(plotmodel2$type)
+levels(plotmodel2$type)<-c('original', 'predict')
+ggplot(plotmodel2, 
+       aes(x = time, y = data, group = type, colour = type)) + 
+  geom_line() +
+  geom_point() +
+  scale_color_manual(values=c("black", "blue")) +
+  ggtitle("Model 2 Forecasting")
+
+# Model3
+plotpred3<-data.frame(time=pred_date, data=fit3.pred$pred, type=1)
+plotmodel3<-rbind(plotdata,plotpred3)
+plotmodel3$type<-factor(plotmodel3$type)
+levels(plotmodel3$type)<-c('original', 'predict')
+ggplot(plotmodel3, 
+       aes(x = time, y = data, group = type, colour = type)) + 
+  geom_line() +
+  geom_point() +
+  scale_color_manual(values=c("black", "blue")) +
+  ggtitle("Model 3 Forecasting")
