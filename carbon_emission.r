@@ -73,8 +73,6 @@ ggplot() +
 acf(diffs2.value, ci.type='ma', lag.max=60)
 pacf(diffs2.value, lag.max=60)
 
-
-
 # model fitting
 #################################
 ############# Good ##############
@@ -280,3 +278,44 @@ o_fit2_3 <- arima(ts.series, c(), seasonal= list(order=c(), period=12))
 fit2$coef;o_fit2_3$coef
 o_fit2_4 <- arima(ts.series, c(), seasonal= list(order=c(), period=12))
 fit2$coef;o_fit2_4$coef
+
+# Forecasting
+# Model1, ARIMA(0,1,2)*SARIMA(1,0,0)
+fit1 <- arima(ts.series, c(0,1,2), seasonal= list(order=c(1,0,0), period=12))
+pred<-12
+fit1.pred<-predict(fit1, n.ahead=pred)
+
+l = length(data$log.value)
+plot(y=data$log.value, x=1:l,xlim=c(-1,(l+pred)), type='l')
+lines(y=c(data$log.value[l], fit1.pred$pred), x=c(l: (l+pred)), col="blue")
+points(y=fit1.pred$pred, x=c((l+1):(l+pred)), col="blue")
+# add CI
+lines(y=fit1.pred$pred+0.96*fit1.pred$se, x=c((l+1):(l+pred)), col="green")      
+points(y=fit1.pred$pred+0.96*fit1.pred$se, x=c((l+1):(l+pred)), col="green")      
+lines(y=fit1.pred$pred-0.96*fit1.pred$se, x=c((l+1):(l+pred)), col="green")      
+points(y=fit1.pred$pred-0.96*fit1.pred$se, x=c((l+1):(l+pred)), col="green")      
+
+# Model2, ARIMA(3,0,0)*SARIMA(0,1,1)
+fit2 <- arima(ts.series, c(3,0,0), seasonal= list(order=c(0,1,1), period=12))  # fail normality tests significantly. Not good
+fit2.pred<-predict(fit2, n.ahead=pred)
+
+plot(y=data$log.value, x=1:l,xlim=c(-1,(l+pred)), type='l')
+lines(y=c(data$log.value[l], fit2.pred$pred), x=c(l: (l+pred)), col="blue")
+points(y=fit2.pred$pred, x=c((l+1):(l+pred)), col="blue")
+# add CI
+lines(y=fit2.pred$pred+0.96*fit2.pred$se, x=c((l+1):(l+pred)), col="green")      
+points(y=fit2.pred$pred+0.96*fit2.pred$se, x=c((l+1):(l+pred)), col="green")      
+lines(y=fit2.pred$pred-0.96*fit2.pred$se, x=c((l+1):(l+pred)), col="green")      
+points(y=fit2.pred$pred-0.96*fit2.pred$se, x=c((l+1):(l+pred)), col="green")      
+
+# Model3, ARIMA(5,1,0)*SARIMA(0,1,0)
+fit3 <- arima(ts.series, c(5,1,0), seasonal= list(order=c(0,1,0), period=12))  # fail normality tests significantly. Not good
+fit3.pred<-predict(fit3, n.ahead=pred)
+plot(y=data$log.value, x=1:l,xlim=c(-1,(l+pred)), type='l')
+lines(y=c(data$log.value[l], fit3.pred$pred), x=c(l: (l+pred)), col="blue")
+points(y=fit3.pred$pred, x=c((l+1):(l+pred)), col="blue")
+# add CI
+lines(y=fit3.pred$pred+0.96*fit3.pred$se, x=c((l+1):(l+pred)), col="green")      
+points(y=fit3.pred$pred+0.96*fit3.pred$se, x=c((l+1):(l+pred)), col="green")      
+lines(y=fit3.pred$pred-0.96*fit3.pred$se, x=c((l+1):(l+pred)), col="green")      
+points(y=fit3.pred$pred-0.96*fit3.pred$se, x=c((l+1):(l+pred)), col="green")      
