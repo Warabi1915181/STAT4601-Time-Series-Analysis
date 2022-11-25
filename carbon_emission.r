@@ -40,8 +40,8 @@ diff1.value = diff(data$log.value)
 ggplot() +
   geom_line(aes(x=data[2:n,1], y=diff1.value)) +
   ylab(TeX('$\\nabla$value'))
-acf(diff1.value, ci.type='ma',lag.max=60)
-pacf(diff1.value)
+acf(diff1.value, ci.type='ma',lag.max=60, main='Sample ACF For First Difference on Log(Emission)')
+pacf(diff1.value, main='Sample PACF For First Difference on Log(Emission)')
 
 # take difference twice
 diff2.value = diff(diff1.value)
@@ -62,8 +62,8 @@ diffs.value = diff(data$log.value, lag = 12)
 ggplot() +
   geom_line(aes(x=data[13:n,1], y=diffs.value)) +
   ylab(TeX('$\\nabla_s$value'))
-acf(diffs.value, ci.type='ma', lag.max=60)
-pacf(diffs.value, lag.max=60)
+acf(diffs.value, ci.type='ma', lag.max=60, main='Sample ACF For First Seasonal Difference on Log(Emission)')
+pacf(diffs.value, lag.max=60,  main='Sample PACF For First Seasonal Difference on Log(Emission)')
 
 # take difference once, and followed by seasonal difference with period=12
 diffs2.value = diff(diff1.value, lag = 12)
@@ -122,7 +122,7 @@ LB.test(fit, lag=10, type="Ljung-Box")
 #################################
 fit <- arima(ts.series, c(3,0,0), seasonal= list(order=c(0,1,0), period=12))  # slow decay in ACF, quick decay after the first 3 lags (except seasonal part) in PACF. Let's ignore seasonal part for now.
 fit                         # AIC = -1823.25
-acf(fit$residuals, ci.type='ma', lag.max = 60)
+acf(fit$residuals, ci.type='ma', main=TeX('Residual ACF Plot for SARIMA$(3,0,0) \\times (0,1,0)_{12}$'), lag.max = 60)
 
 #################################
 fit <- arima(ts.series, c(3,0,0), seasonal= list(order=c(0,1,2), period=12))  # Improvement in AIC. Coefficients are slightly significant. Significant residual acf at lag 3
