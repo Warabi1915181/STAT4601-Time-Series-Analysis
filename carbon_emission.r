@@ -111,6 +111,7 @@ res.ts <- ts(res, frequency=12, start=c(1973, 1))
 plot(res.ts, xlab='Time', ylab='', main='Standardized Residuals Scatterplot', type='p')
 shapiro.test(fit$residuals)
 LB.test(fit, lag=10, type="Ljung-Box")
+LB.test(fit, lag=20, type="Ljung-Box")
 
 
 
@@ -121,7 +122,7 @@ LB.test(fit, lag=10, type="Ljung-Box")
 fit <- arima(ts.series, c(3,0,0), seasonal= list(order=c(0,1,0), period=12))  # slow decay in ACF, quick decay after the first 3 lags (except seasonal part) in PACF. Let's ignore seasonal part for now (Final Model)
 fit                         # AIC = -1823.25
 res <- resid(fit)
-acf(res, ci.type='ma')
+acf(res, ci.type='ma', lag.max = 60)
 
 tsdiag(fit)
 hist(fit$residuals)         # bell shape.
@@ -129,32 +130,47 @@ qqnorm(fit$residuals)       # qq plot looks normal
 qqline(fit$residuals)
 plot(fit$residuals)
 shapiro.test(fit$residuals) # passes shapiro-wilk normality test with 0.1257 p-value
-LB.test(fit, lag=10, type="Ljung-Box")  # p-value = 0.08252
+LB.test(fit, lag=10, type="Ljung-Box")
 #################################
-fit <- arima(ts.series, c(2,0,0), seasonal= list(order=c(0,1,0), period=12))  # better normality, worse resdiual acf, worse aic. Let's keep using ARIMA(3,0,0) x (0,1,0)_12 for now and try overfitting.
+fit <- arima(ts.series, c(2,0,0), seasonal= list(order=c(0,1,0), period=12))  # better normality, worse residual acf, worse aic. Let's keep using ARIMA(3,0,0) x (0,1,0)_12 for now and try overfitting.
 fit                         # AIC = -1815.5
 res <- resid(fit)
 acf(res, ci.type='ma')
 #################################
 fit <- arima(ts.series, c(3,0,1), seasonal= list(order=c(0,1,0), period=12))  # some insignificant coefficients, bad standard error for coefficients, similar residual acf, satisfy normality. Not desirable in general
-fit                         # AIC -1823.16, slightly worse AIC
+fit                         # AIC = -1823.16, slightly worse AIC
 res <- resid(fit)
 acf(res, ci.type='ma')
 #################################
 fit <- arima(ts.series, c(3,0,0), seasonal= list(order=c(1,1,0), period=12))  # fail normality tests and Ljung-Box test. Not good
-fit                         # AIC -1897.09, some improvement in AIC
+fit                         # AIC = -1897.09, some improvement in AIC
 res <- resid(fit)
 acf(res, ci.type='ma')
 #################################
 fit <- arima(ts.series, c(3,0,0), seasonal= list(order=c(0,1,1), period=12))  # fail normality tests significantly. Not good
-fit                         # AIC -2000.81, large improvement in AIC
+fit                         # AIC = -2000.81, large improvement in AIC
 res <- resid(fit)
 acf(res, ci.type='ma')
 #################################
 fit <- arima(ts.series, c(4,0,0), seasonal= list(order=c(0,1,0), period=12))  # insignificant coefficients for ar2, ar3 and ar4. No improvement in general
-fit                         # AIC -1824.2, no improvement in AIC
-res <- resid(fit)
-acf(res, ci.type='ma')
+fit                         # AIC = -1824.2, no improvement in AIC
+acf(fit$residuals, ci.type='ma', lag.max = 60)
+#################################
+fit <- arima(ts.series, c(4,0,0), seasonal= list(order=c(0,1,2), period=12))  # some insignificant coefficients. No improvement in general despite AIC
+fit                         # AIC = -2017.95
+acf(fit$residuals, ci.type='ma', lag.max = 60)
+#################################
+fit <- arima(ts.series, c(4,0,5), seasonal= list(order=c(0,1,2), period=12))  # some insignificant coefficients and large standard error. No improvement in general despite residuals acf. 
+fit                         # AIC = -2045.05
+acf(fit$residuals, ci.type='ma', lag.max = 60)
+#################################
+fit <- arima(ts.series, c(4,0,4), seasonal= list(order=c(0,1,2), period=12))  # some insignificant coefficients and large standard error. Show some improvement in AIC and residuals acf
+fit                         # AIC = -2056.05
+acf(fit$residuals, ci.type='ma', lag.max = 60)
+#################################
+fit <- arima(ts.series, c(4,0,3), seasonal= list(order=c(0,1,2), period=12))  # significant coefficients and standard error is reduced. Residuals ACF look good
+fit                         # AIC = -2056.05
+acf(fit$residuals, ci.type='ma', lag.max = 60)
 
 
 
