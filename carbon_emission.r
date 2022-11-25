@@ -126,19 +126,19 @@ acf(fit$residuals, ci.type='ma', main=TeX('Residual ACF Plot for SARIMA$(3,0,0) 
 #################################
 fit <- arima(ts.series, c(3,0,0), seasonal= list(order=c(0,1,2), period=12))  # Improvement in AIC. Coefficients are slightly significant. Significant residual acf at lag 3
 fit                         # AIC = -2004.01
-acf(fit$residuals, ci.type='ma', lag.max = 60)
+acf(fit$residuals, ci.type='ma', main=TeX('Residual ACF Plot for SARIMA$(3,0,0) \\times (0,1,2)_{12}$'), lag.max = 60)
 #################################
 fit <- arima(ts.series, c(3,0,3), seasonal= list(order=c(0,1,2), period=12))  # large standard error for coefficients in common part. try others parameters for common part
 fit                         # AIC = -2036.1
-acf(fit$residuals, ci.type='ma', lag.max = 60)
+acf(fit$residuals, ci.type='ma', main=TeX('Residual ACF Plot for SARIMA$(3,0,3) \\times (0,1,2)_{12}$'), lag.max = 60)
 #################################
 fit <- arima(ts.series, c(3,0,4), seasonal= list(order=c(0,1,2), period=12))  # standard error for coefficients in common part are still large. No improvement in AIC. Try another model
 fit                         # AIC = -2037.34
-acf(fit$residuals, ci.type='ma', lag.max = 60)
+acf(fit$residuals, ci.type='ma', main=TeX('Residual ACF Plot for SARIMA$(3,0,4) \\times (0,1,2)_{12}$'), lag.max = 60)
 #################################
 fit <- arima(ts.series, c(4,0,3), seasonal= list(order=c(0,1,2), period=12))  # improvement in AIC. Standard error for coefficients are smaller. Residuals ACF look better. (Final Model)
 fit                         # AIC = -2055.55
-acf(fit$residuals, ci.type='ma', lag.max = 60)
+acf(fit$residuals, ci.type='ma', main=TeX('Residual ACF Plot for SARIMA$(4,0,3) \\times (0,1,2)_{12}$'), lag.max = 60)
 
 tsdiag(fit)
 hist(fit$residuals)         # bell shape.
