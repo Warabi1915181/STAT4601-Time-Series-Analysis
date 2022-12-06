@@ -122,7 +122,23 @@ LB.test(fit, lag=20, type="Ljung-Box")
 fit <- arima(ts.series, c(3,0,0), seasonal= list(order=c(0,1,0), period=12))  # slow decay in ACF, quick decay after the first 3 lags (except seasonal part) in PACF. Let's ignore seasonal part for now.
 fit                         # AIC = -1823.25
 acf(fit$residuals, ci.type='ma', main=TeX('Residual ACF Plot for SARIMA$(3,0,0) \\times (0,1,0)_{12}$'), lag.max = 60)
+#################################
+fit <- arima(ts.series, c(3,0,0), seasonal= list(order=c(0,1,1), period=12))
+fit
+acf(fit$residuals, ci.type='ma', main=TeX('Residual ACF Plot for SARIMA$(3,0,0) \\times (0,1,0)_{12}$'), lag.max = 60)
 
+fit <- arima(ts.series, c(3,0,3), seasonal= list(order=c(0,1,1), period=12))  
+fit
+acf(fit$residuals, ci.type='ma', lag.max = 60)
+
+fit <- arima(ts.series, c(4,0,3), seasonal= list(order=c(0,1,1), period=12))  
+fit
+acf(fit$residuals, ci.type='ma', lag.max = 60)
+pacf(fit$residuals, lag.max = 60)
+
+fit <- arima(ts.series, c(4,0,3), seasonal= list(order=c(0,1,2), period=12))  
+fit
+acf(fit$residuals, ci.type='ma', lag.max = 60)
 #################################
 fit <- arima(ts.series, c(3,0,0), seasonal= list(order=c(0,1,2), period=12))  # Improvement in AIC. Coefficients are slightly significant. Significant residual acf at lag 3
 fit                         # AIC = -2004.01
