@@ -288,94 +288,50 @@ fit2$coef;o_fit2_4$coef
 
 # Forecasting
 #################################
+# Remove data of last year
+tspred.series = ts(data$log.value[1:583], frequency=12, start=c(1973, 1))
+
 # Model1, ARIMA(0,1,2)*SARIMA(1,0,0)
-fit1 <- arima(ts.series, c(0,1,2), seasonal= list(order=c(1,0,0), period=12))
+fit1 <- arima(tspred.series, c(0,1,2), seasonal= list(order=c(1,0,0), period=12))
 pred<-12
 fit1.pred<-predict(fit1, n.ahead=pred)
 
-l = length(data$log.value)
-plot(y=data$log.value[400:l], x=400:l,xlim=c(400,(l+pred)), type='l')
-lines(y=c(data$log.value[l], fit1.pred$pred), x=c(l: (l+pred)), col="blue")
-points(y=fit1.pred$pred, x=c((l+1):(l+pred)), col="blue")
-# add CI
-lines(y=fit1.pred$pred+1.96*fit1.pred$se, x=c((l+1):(l+pred)), col="red")      
-points(y=fit1.pred$pred+1.96*fit1.pred$se, x=c((l+1):(l+pred)), col="red")      
-lines(y=fit1.pred$pred-1.96*fit1.pred$se, x=c((l+1):(l+pred)), col="red")      
-points(y=fit1.pred$pred-1.96*fit1.pred$se, x=c((l+1):(l+pred)), col="red")      
-
 # Model2, ARIMA(4,0,3)*SARIMA(0,1,2)
-fit2 <- arima(ts.series, c(4,0,3), seasonal= list(order=c(0,1,2), period=12))  # fail normality tests significantly. Not good
+fit2 <- arima(tspred.series, c(4,0,3), seasonal= list(order=c(0,1,2), period=12))
 fit2.pred<-predict(fit2, n.ahead=pred)
 
-plot(y=data$log.value, x=1:l,xlim=c(-1,(l+pred)), type='l')
-lines(y=c(data$log.value[l], fit2.pred$pred), x=c(l: (l+pred)), col="blue")
-points(y=fit2.pred$pred, x=c((l+1):(l+pred)), col="blue")
-# add CI
-lines(y=fit2.pred$pred+0.96*fit2.pred$se, x=c((l+1):(l+pred)), col="green")      
-points(y=fit2.pred$pred+0.96*fit2.pred$se, x=c((l+1):(l+pred)), col="green")      
-lines(y=fit2.pred$pred-0.96*fit2.pred$se, x=c((l+1):(l+pred)), col="green")      
-points(y=fit2.pred$pred-0.96*fit2.pred$se, x=c((l+1):(l+pred)), col="green")      
-
-# Model3, ARIMA(5,1,0)*SARIMA(0,1,0)
-fit3 <- arima(ts.series, c(5,1,0), seasonal= list(order=c(0,1,0), period=12)) 
-fit3.pred<-predict(fit3, n.ahead=pred)
-plot(y=data$log.value, x=1:l,xlim=c(-1,(l+pred)), type='l')
-lines(y=c(data$log.value[l], fit3.pred$pred), x=c(l: (l+pred)), col="blue")
-points(y=fit3.pred$pred, x=c((l+1):(l+pred)), col="blue")
-# add CI
-lines(y=fit3.pred$pred+0.96*fit3.pred$se, x=c((l+1):(l+pred)), col="green")      
-points(y=fit3.pred$pred+0.96*fit3.pred$se, x=c((l+1):(l+pred)), col="green")      
-lines(y=fit3.pred$pred-0.96*fit3.pred$se, x=c((l+1):(l+pred)), col="green")      
-points(y=fit3.pred$pred-0.96*fit3.pred$se, x=c((l+1):(l+pred)), col="green")      
-
 # ggplot
-pred_date<-seq(as.Date("2022-07-01"), by = "month", length.out = 12)
-plotdata<-data.frame(time=data$time, data=data$log.value, ci_low=NULL, ci_up=NULL, type=0)
+pred_date<-seq(as.Date("2021-08-01"), by = "month", length.out = 12)
+origdata<-data.frame(time=data$time, original=data$log.value)
 
 # Model1
-plotpred1<-data.frame(time=pred_date, data=fit1.pred$pred, ci_low=fit1.pred$pred-1.96*fit1.pred$se, ci_up=fit1.pred$pred+1.96*fit1.pred$se, type=1)
-plotmodel1<-rbind(plotdata,plotpred1)
-plotmodel1$type<-factor(plotmodel1$type)
-levels(plotmodel1$type)<-c('original', 'predict')
-shortenedplot1<-plotmodel1[400:607,]
+plotpred1<-data.frame(time=pred_date, predict=fit1.pred$pred, ci_low=fit1.pred$pred-1.96*fit1.pred$se, ci_up=fit1.pred$pred+1.96*fit1.pred$se)
+plotmodel1<-merge(origdata, plotpred1, by="time", all.x=TRUE)
+shortenedplot1<-plotmodel1[450:595,]
 ggplot() + 
-  geom_line(shortenedplot1, mapping=aes(x = time, y = data, group = type, colour = type)) +
-  geom_point(shortenedplot1, mapping=aes(x = time, y = data, group = type, colour = type)) +
-  geom_line(plotmodel1[596:607,], mapping=aes(x = time, y = ci_up, colour = "red")) +
-  geom_point(plotmodel1[596:607,], mapping=aes(x = time, y = ci_up, colour = "red")) +
-  geom_line(plotmodel1[596:607,], mapping=aes(x = time, y = ci_low, colour = "red")) +
-  geom_point(plotmodel1[596:607,], mapping=aes(x = time, y = ci_low, colour = "red")) +
-  scale_color_manual(values=c("black", "blue", "red")) +
+  geom_line(shortenedplot1, mapping=aes(x = time, y = exp(original))) +
+  geom_line(shortenedplot1, mapping=aes(x = time, y = exp(predict)), colour = "red") +
+  geom_line(shortenedplot1, mapping=aes(x = time, y = exp(ci_low)), colour = "blue", linetype="dashed") +
+  geom_line(shortenedplot1, mapping=aes(x = time, y = exp(ci_up)), colour = "blue", linetype="dashed") +
+  ylab("data") +
   ggtitle("Model 1 Forecasting")
 
 # Model2
-plotpred2<-data.frame(time=pred_date, data=fit2.pred$pred, ci_low=fit2.pred$pred-1.96*fit2.pred$se, ci_up=fit2.pred$pred+1.96*fit2.pred$se, type=1)
-plotmodel2<-rbind(plotdata,plotpred2)
-plotmodel2$type<-factor(plotmodel2$type)
-levels(plotmodel2$type)<-c('original', 'predict')
-shortenedplot2<-plotmodel2[400:607,]
-ggplot() + 
-  geom_line(shortenedplot2, mapping=aes(x = time, y = data, group = type, colour = type)) +
-  geom_point(shortenedplot2, mapping=aes(x = time, y = data, group = type, colour = type)) +
-  geom_line(plotmodel2[596:607,], mapping=aes(x = time, y = ci_up, colour = "red")) +
-  geom_point(plotmodel2[596:607,], mapping=aes(x = time, y = ci_up, colour = "red")) +
-  geom_line(plotmodel2[596:607,], mapping=aes(x = time, y = ci_low, colour = "red")) +
-  geom_point(plotmodel2[596:607,], mapping=aes(x = time, y = ci_low, colour = "red")) +
-  scale_color_manual(values=c("black", "blue", "red")) +
+plotpred2<-data.frame(time=pred_date, predict=fit2.pred$pred, ci_low=fit2.pred$pred-1.96*fit2.pred$se, ci_up=fit2.pred$pred+1.96*fit2.pred$se)
+plotmodel2<-merge(origdata, plotpred2, by="time", all.x=TRUE)
+shortenedplot2<-plotmodel2[450:595,]
+ggplot(shortenedplot2) + 
+  geom_line(mapping=aes(x = time, y = exp(original))) +
+  geom_line(mapping=aes(x = time, y = exp(predict)), colour = "red") +
+  geom_line(mapping=aes(x = time, y = exp(ci_low)), colour = "blue", linetype="dashed") +
+  geom_line(mapping=aes(x = time, y = exp(ci_up)), colour = "blue", linetype="dashed") +
+  ylab("data") +
   ggtitle("Model 2 Forecasting")
 
-# Model3
-plotpred3<-data.frame(time=pred_date, data=fit3.pred$pred, ci_low=fit3.pred$pred-1.96*fit3.pred$se, ci_up=fit3.pred$pred+1.96*fit3.pred$se, type=1)
-plotmodel3<-rbind(plotdata,plotpred3)
-plotmodel3$type<-factor(plotmodel3$type)
-levels(plotmodel3$type)<-c('original', 'predict')
-shortenedplot3<-plotmodel3[400:607,]
-ggplot() + 
-  geom_line(shortenedplot3, mapping=aes(x = time, y = data, group = type, colour = type)) +
-  geom_point(shortenedplot3, mapping=aes(x = time, y = data, group = type, colour = type)) +
-  geom_line(plotmodel3[596:607,], mapping=aes(x = time, y = ci_up, colour = "red")) +
-  geom_point(plotmodel3[596:607,], mapping=aes(x = time, y = ci_up, colour = "red")) +
-  geom_line(plotmodel3[596:607,], mapping=aes(x = time, y = ci_low, colour = "red")) +
-  geom_point(plotmodel3[596:607,], mapping=aes(x = time, y = ci_low, colour = "red")) +
-  scale_color_manual(values=c("black", "blue", "red")) +
-  ggtitle("Model 3 Forecasting")
+# calculate RMSE
+model1data<-plotmodel1[584:595, 1:3]
+rmse1<-sqrt(mean(exp(model1data$original) - exp(model1data$predict))^2)
+rmse1
+model2data<-plotmodel2[584:595, 1:3]
+rmse2<-sqrt(mean(exp(model2data$original) - exp(model2data$predict))^2)
+rmse2
